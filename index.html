@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Email Categorizer & Auto-Responder</title>
+  <!-- Tailwind CSS for sleek styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+  <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+        ⚡ AI Email Categorizer & Responder
+      </h1>
+      <p class="mt-3 text-lg text-slate-600">
+        Paste any email to automatically categorize its intent and instantly draft a perfect, context-aware reply.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      
+      <!-- Input Section -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          📥 Paste Received Email
+        </h2>
+        <form id="categorizerForm" class="space-y-4">
+          <div>
+            <label for="emailSubject" class="block text-sm font-semibold text-slate-700">Subject (Optional)</label>
+            <input 
+              type="text" 
+              id="emailSubject" 
+              placeholder="e.g., Question about pricing" 
+              class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm"
+            >
+          </div>
+          <div>
+            <label for="emailBody" class="block text-sm font-semibold text-slate-700">Email Body <span class="text-red-500">*</span></label>
+            <textarea 
+              id="emailBody" 
+              rows="8" 
+              required
+              placeholder="Paste the full email contents here..." 
+              class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm"
+            ></textarea>
+          </div>
+          
+          <div>
+            <label for="senderTone" class="block text-sm font-semibold text-slate-700">Desired Reply Tone</label>
+            <select 
+              id="senderTone" 
+              class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 bg-white focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm"
+            >
+              <option value="Professional & Helpful">Professional & Helpful</option>
+              <option value="Friendly & Warm">Friendly & Warm</option>
+              <option value="Direct & Concise">Direct & Concise</option>
+              <option value="Apologetic (for complaints)">Apologetic & Solving</option>
+            </select>
+          </div>
+
+          <button 
+            type="submit" 
+            id="submitBtn"
+            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150"
+          >
+            Categorize & Draft Reply
+          </button>
+        </form>
+      </div>
+
+      <!-- Output Section -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            ✨ AI Analysis & Draft
+          </h2>
+          
+          <!-- Placeholder State -->
+          <div id="placeholderState" class="py-12 text-center text-slate-400">
+            <svg class="mx-auto h-12 w-12 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <p class="text-sm">Submit an email on the left to see categorization, tags, and custom drafted replies instantly.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loadingState" class="hidden py-12 text-center text-slate-500">
+            <svg class="animate-spin mx-auto h-8 w-8 text-indigo-600 mb-3" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-sm">Analyzing email context and drafting responses...</p>
+          </div>
+
+          <!-- Results State -->
+          <div id="resultsState" class="hidden space-y-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Category Tag</span>
+              <div class="mt-1 flex gap-2">
+                <span id="categoryBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  Inquiry
+                </span>
+                <span id="sentimentBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                  Neutral Sentiment
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Summary</span>
+              <p id="emailSummary" class="mt-1 text-sm text-slate-600 italic">
+                Summary details...
+              </p>
+            </div>
+
+            <div class="border-t border-slate-100 pt-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Suggested Draft Reply</span>
+              <div class="relative mt-2">
+                <textarea 
+                  id="draftReply" 
+                  rows="8" 
+                  class="block w-full rounded-lg border-slate-300 border p-3 focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono bg-slate-50 text-slate-800"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultsActions" class="hidden mt-6 border-t border-slate-100 pt-4 flex gap-3">
+          <button 
+            id="copyBtn"
+            class="flex-1 inline-flex justify-center items-center py-2 px-4 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 focus:outline-none"
+          >
+            📋 Copy Reply
+          </button>
+          <a 
+            id="mailtoBtn"
+            href="#"
+            class="flex-1 inline-flex justify-center items-center py-2 px-4 border border-transparent rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none"
+          >
+            ✉️ Open in Mail
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('categorizerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    const placeholderState = document.getElementById('placeholderState');
+    const loadingState = document.getElementById('loadingState');
+    const resultsState = document.getElementById('resultsState');
+    const resultsActions = document.getElementById('resultsActions');
+
+    const categoryBadge = document.getElementById('categoryBadge');
+    const sentimentBadge = document.getElementById('sentimentBadge');
+    const emailSummary = document.getElementById('emailSummary');
+    const draftReply = document.getElementById('draftReply');
+    const copyBtn = document.getElementById('copyBtn');
+    const mailtoBtn = document.getElementById('mailtoBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const subject = document.getElementById('emailSubject').value;
+      const body = document.getElementById('emailBody').value;
+      const tone = document.getElementById('senderTone').value;
+
+      // Update UI states
+      placeholderState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      resultsState.classList.add('hidden');
+      resultsActions.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/.netlify/functions/categorize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, body, tone })
+        });
+
+        if (!response.ok) {
+          throw new Error('Server returned an error: ' + response.statusText);
+        }
+
+        const data = await response.json();
+
+        // Inject response data
+        categoryBadge.innerText = data.category || 'General';
+        sentimentBadge.innerText = data.sentiment || 'Neutral';
+        emailSummary.innerText = data.summary || 'No summary available.';
+        draftReply.value = data.draftReply || '';
+
+        // Mailto setup
+        const mailtoSubject = subject ? `Re: ${subject}` : 'Reply';
+        mailtoBtn.href = `mailto:?subject=${encodeURIComponent(mailtoSubject)}&body=${encodeURIComponent(data.draftReply)}`;
+
+        // Show result states
+        loadingState.classList.add('hidden');
+        resultsState.classList.remove('hidden');
+        resultsActions.classList.remove('hidden');
+
+      } catch (error) {
+        alert('Error categorizing email: ' + error.message);
+        placeholderState.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      draftReply.select();
+      document.execCommand('copy');
+      const originalText = copyBtn.innerText;
+      copyBtn.innerText = '✅ Copied!';
+      setTimeout(() => {
+        copyBtn.innerText = originalText;
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
